@@ -1,0 +1,148 @@
+﻿<div id="SDM220">
+  <link rel="stylesheet" href="/js/c3-0.6.6/c3.css">
+  <script  src="/js/d3/d3.min.js"></script>
+  <script  src="/js/c3-0.6.6/c3.min.js"></script>
+	<div id="data">
+    <img src="svg/voltage.svg" alt="photo" id="voltage-img">
+    <span>Время:</span><span id="TimeStamp"></span><br>
+		<span>Напряжение:</span><span id="Line_to_neutral_volts"></span><br>
+    <span>Ток:</span><span id="Current"></span><br>
+    <span>Полная мощность:</span><span id="Apparent_power"></span><br>
+    <span>Полученная энергия:</span><span id="Import_active_energy"></span><br>
+    <div id="chart" style="width: 70%;min-width: 400px;height: 300px;"></div><br>
+	</div>
+<style type="text/css">
+  #SDM220 
+  {
+    line-height: 1;
+  }
+  #SDM220 #voltage-img
+  {
+    width: 32px;
+    height: 32px;
+  }
+  #data
+  {
+    border: solid black 2px;
+    background-color: orange;
+    display: inline-block;
+  }
+</style>
+<script type="text/javascript">
+var xmlHttp=createXmlHttpObject();
+function createXmlHttpObject(){
+var xmlhttp;
+  try {
+    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+  } catch (e) {
+    try {
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    } catch (E) {
+      xmlhttp = false;
+    }
+  }
+  if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+    xmlhttp = new XMLHttpRequest();
+  }
+  return xmlhttp;
+}
+
+function process(){
+ if(xmlHttp.readyState==0 || xmlHttp.readyState==4){
+   xmlHttp.open('PUT','/modules/SDM220/SDM220.php?target=data',true);
+   xmlHttp.onreadystatechange=handleServerResponse; // no brackets?????
+   xmlHttp.send(null);
+ }
+ setTimeout('process()',1000);
+}
+
+function Queue() {
+  this.data = [];
+}
+Queue.prototype.at = function(id) {
+  return this.data[id];
+}
+Queue.prototype.add = function(record) {
+  this.data.unshift(record);
+}
+Queue.prototype.remove = function() {
+  this.data.pop();
+}
+Queue.prototype.first = function() {
+  return this.data[0];
+}
+Queue.prototype.last = function() {
+  return this.data[this.data.length - 1];
+}
+Queue.prototype.size = function() {
+  return this.data.length;
+}
+
+const voltage = new Queue();
+const time = new Queue();
+
+for (var i = 0; i < 10; i++) {
+  voltage.add(null);
+  time.add(null);
+}
+
+
+var chart = c3.generate({
+    data: {
+        x: 'x',
+//        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
+        columns: [
+            ['voltage', voltage.at(9), voltage.at(8), voltage.at(7), voltage.at(6), voltage.at(5), voltage.at(4), voltage.at(3), voltage.at(2), voltage.at(1), voltage.at(0)],
+            ['x', time.at(9), time.at(8), time.at(7), time.at(6), time.at(5), time.at(4), time.at(3), time.at(2), time.at(1), time.at(0)]
+        ]
+    },
+    axis: {
+        x: {
+            type: 'timeseries',
+            tick: {
+                format: '%H:%M:%S'
+            }
+        }
+    }
+});
+
+function handleServerResponse(){
+ if(xmlHttp.readyState==4 && xmlHttp.status==200){
+   xmlResponse=xmlHttp.responseXML;
+
+
+var date = new Date(xmlResponse.getElementsByTagName('SDM220')[0].getAttribute('TimeStamp')*1000);
+// Hours part from the timestamp
+var hours = date.getHours();
+// Minutes part from the timestamp
+var minutes = date.getMinutes();
+// Seconds part from the timestamp
+var seconds = date.getSeconds();
+
+
+ voltage.remove;
+ time.remove;
+
+ voltage.add(parseFloat(xmlResponse.getElementsByTagName('Line_to_neutral_volts') [0].firstChild.nodeValue).toFixed(3));
+ time.add(xmlResponse.getElementsByTagName('SDM220')[0].getAttribute('TimeStamp')*1000);
+ 
+  chart.load({
+
+//        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
+        columns: [
+            ['voltage', voltage.at(9), voltage.at(8), voltage.at(7), voltage.at(6), voltage.at(5), voltage.at(4), voltage.at(3), voltage.at(2), voltage.at(1), voltage.at(0)],
+            ['x', time.at(9), time.at(8), time.at(7), time.at(6), time.at(5), time.at(4), time.at(3), time.at(2), time.at(1), time.at(0)]
+        ]
+
+  });
+        
+   document.getElementById('TimeStamp')             .innerHTML = hours + ':' + minutes + ':' + seconds;
+   document.getElementById('Line_to_neutral_volts') .innerHTML = parseFloat(xmlResponse.getElementsByTagName('Line_to_neutral_volts') [0].firstChild.nodeValue).toFixed(3);
+   document.getElementById('Current')               .innerHTML = parseFloat(xmlResponse.getElementsByTagName('Current')               [0].firstChild.nodeValue).toFixed(3);
+   document.getElementById('Apparent_power')        .innerHTML = parseFloat(xmlResponse.getElementsByTagName('Apparent_power')        [0].firstChild.nodeValue).toFixed(3);
+   document.getElementById('Import_active_energy')  .innerHTML = parseFloat(xmlResponse.getElementsByTagName('Import_active_energy')  [0].firstChild.nodeValue).toFixed(3);
+ }
+}
+process();
+</script>
+</div>

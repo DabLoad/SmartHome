@@ -1,0 +1,7 @@
+#!SDM220Data
+/dev/ttyUSB1
+/home/caricardo/tmpfs/SDM220
+localhost
+Login
+Password
+Database

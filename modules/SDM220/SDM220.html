@@ -1,0 +1,84 @@
+﻿<div id="SDM220">
+	<div id="data">
+    <span>Время:</span><span id="TimeStamp"></span><br>
+		<span>Напряжение:</span><span id="Line_to_neutral_volts"></span><br>
+    <span>Ток:</span><span id="Current"></span><br>
+    <span>Активная мощность:</span><span id="Active_power"></span><br>
+    <span>Полная мощность:</span><span id="Apparent_power"></span><br>
+    <span>Реактивная мощность:</span><span id="Reactive_power"></span><br>
+    <span>Коэффициент мощности:</span><span id="Power_factor"></span><br>
+    <span>Угол сдвига Фазы:</span><span id="Phase_angle"></span><br>
+    <span>Частота:</span><span id="Frequency"></span><br>
+    <span>Полученная активная энергия:</span><span id="Import_active_energy"></span><br>
+    <span>Сгенерированная активная энергия:</span><span id="Export_active_energy"></span><br>
+    <span>Полученная реактивная энергия:</span><span id="Import_reactive_energy"></span><br>
+    <span>Сгенерированная реактивная энергия:</span><span id="Export_reactive_energy"></span><br>
+    <span>Общая активная энергия:</span><span id="Total_active_energy"></span><br>
+    <span>Общая реактивная энергия:</span><span id="Total_reactive_energy"></span><br>
+	</div>
+</body>
+<style type="text/css">
+</style>
+
+<script type="text/javascript" src='../../js/jquery-3.3.1.min.js'></script>
+<script type="text/javascript">
+var xmlHttp=createXmlHttpObject();
+function createXmlHttpObject(){
+var xmlhttp;
+  try {
+    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+  } catch (e) {
+    try {
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    } catch (E) {
+      xmlhttp = false;
+    }
+  }
+  if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+    xmlhttp = new XMLHttpRequest();
+  }
+  return xmlhttp;
+}
+
+function process(){
+ if(xmlHttp.readyState==0 || xmlHttp.readyState==4){
+   xmlHttp.open('PUT','/modules/SDM220/SDM220.php?target=data',true);
+   xmlHttp.onreadystatechange=handleServerResponse; // no brackets?????
+   xmlHttp.send(null);
+ }
+ setTimeout('process()',1000);
+}
+
+function handleServerResponse(){
+ if(xmlHttp.readyState==4 && xmlHttp.status==200){
+   xmlResponse=xmlHttp.responseXML;
+
+var date = new Date(xmlResponse.getElementsByTagName('SDM220')[0].getAttribute('TimeStamp')*1000);
+// Hours part from the timestamp
+var hours = date.getHours();
+// Minutes part from the timestamp
+var minutes = date.getMinutes();
+// Seconds part from the timestamp
+var seconds = date.getSeconds();
+   
+   document.getElementById('TimeStamp')             .innerHTML = hours + ':' + minutes + ':' + seconds;
+
+   document.getElementById('Line_to_neutral_volts') .innerHTML = xmlResponse.getElementsByTagName('Line_to_neutral_volts') [0].firstChild.nodeValue;
+   document.getElementById('Current')               .innerHTML = xmlResponse.getElementsByTagName('Current')               [0].firstChild.nodeValue;
+   document.getElementById('Active_power')          .innerHTML = xmlResponse.getElementsByTagName('Active_power')          [0].firstChild.nodeValue;
+   document.getElementById('Apparent_power')        .innerHTML = xmlResponse.getElementsByTagName('Apparent_power')        [0].firstChild.nodeValue;
+   document.getElementById('Reactive_power')        .innerHTML = xmlResponse.getElementsByTagName('Reactive_power')        [0].firstChild.nodeValue;
+   document.getElementById('Power_factor')          .innerHTML = xmlResponse.getElementsByTagName('Power_factor')          [0].firstChild.nodeValue;
+   document.getElementById('Phase_angle')           .innerHTML = xmlResponse.getElementsByTagName('Phase_angle')           [0].firstChild.nodeValue;
+   document.getElementById('Frequency')             .innerHTML = xmlResponse.getElementsByTagName('Frequency')             [0].firstChild.nodeValue;
+   document.getElementById('Import_active_energy')  .innerHTML = xmlResponse.getElementsByTagName('Import_active_energy')  [0].firstChild.nodeValue;
+   document.getElementById('Export_active_energy')  .innerHTML = xmlResponse.getElementsByTagName('Export_active_energy')  [0].firstChild.nodeValue;
+   document.getElementById('Import_reactive_energy').innerHTML = xmlResponse.getElementsByTagName('Import_reactive_energy')[0].firstChild.nodeValue;
+   document.getElementById('Export_reactive_energy').innerHTML = xmlResponse.getElementsByTagName('Export_reactive_energy')[0].firstChild.nodeValue;
+   document.getElementById('Total_active_energy')   .innerHTML = xmlResponse.getElementsByTagName('Total_active_energy')   [0].firstChild.nodeValue;
+   document.getElementById('Total_reactive_energy') .innerHTML = xmlResponse.getElementsByTagName('Total_reactive_energy') [0].firstChild.nodeValue;
+ }
+}
+process();
+</script>
+</div>
